@@ -26,3 +26,21 @@ class HospitalCostComparisonResponse(BaseModel):
     query_params: dict[str, Any]
     results: list[HospitalRecord]
     disclaimer: str
+
+class HospitalNetworkRecord(BaseModel):
+    hospital_name: str
+    city: str
+    location: str
+    specialties: list[str]
+    procedure_name: str | None = None
+    insurer_name: str
+    network_status: str = Field(description="IN_NETWORK / NOT_AVAILABLE / UNKNOWN")
+    cashless_status: str = Field(description="CASHLESS — VERIFIED / CASHLESS — DEMO DATA / NOT AVAILABLE / UNKNOWN")
+    source: str
+    data_status: str = Field(description="VERIFIED_SOURCE / DEMO_DATA / NOT_AVAILABLE")
+    verification_date: str | None = None
+
+class HospitalNetworkResponse(BaseModel):
+    query_params: dict[str, Any]
+    results: list[HospitalNetworkRecord]
+    disclaimer: str

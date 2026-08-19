@@ -58,6 +58,26 @@ export default function HealthcareCostsPage() {
   // Selected hospitals comparison state (maximum 3)
   const [selectedHospitals, setSelectedHospitals] = useState<HospitalRecord[]>([]);
 
+  // Fetch initial query state from localStorage if redirected from Hospitals network page
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const cachedParams = localStorage.getItem("carefin_costs_query_params");
+      if (cachedParams) {
+        try {
+          const parsed = JSON.parse(cachedParams);
+          // Decouple state updates using a macro-task delay
+          setTimeout(() => {
+            if (parsed.city) setCity(parsed.city);
+            if (parsed.procedure) setProcedure(parsed.procedure);
+          }, 0);
+          localStorage.removeItem("carefin_costs_query_params");
+        } catch {
+          // Ignore
+        }
+      }
+    }
+  }, []);
+
   // Fetch costs handler
   const fetchCosts = useCallback(async () => {
     setIsLoading(true);

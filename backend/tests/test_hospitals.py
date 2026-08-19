@@ -112,3 +112,108 @@ def test_hospitals_no_fake_network_claims():
     for record in data["results"]:
         assert "network_status" not in record
         assert "cashless_verified" not in record
+
+def test_hospitals_valid_network_query():
+    """Verify that network query returns structured results and disclaimer."""
+    response = client.get("/api/hospitals/network")
+    assert response.status_code == 200
+    data = response.json()
+    assert "results" in data
+    assert "disclaimer" in data
+    assert len(data["results"]) > 0
+
+def test_hospitals_network_filters():
+    """Verify separate filter rules for city, insurer, procedure, specialty, and cashless status."""
+    # City filter
+    r_city = client.get("/api/hospitals/network?city=Mumbai").json()
+    for rec in r_city["results"]:
+        assert rec["city"] == "Mumbai"
+
+    # Insurer filter
+    r_ins = client.get("/api/hospitals/network?insurer=CareGuard Insurance").json()
+    for rec in r_ins["results"]:
+        assert rec["insurer_name"] == "CareGuard Insurance"
+
+    # Procedure filter
+    r_proc = client.get("/api/hospitals/network?procedure=Angioplasty").json()
+    for rec in r_proc["results"]:
+        assert rec["procedure_name"] == "Angioplasty"
+
+    # Specialty filter
+    r_spec = client.get("/api/hospitals/network?specialty=Cardiology").json()
+    for rec in r_spec["results"]:
+        assert "Cardiology" in rec["specialties"]
+
+    # Cashless filter
+    r_cash = client.get("/api/hospitals/network?cashless=true").json()
+    for rec in r_cash["results"]:
+        assert rec["cashless_status"] in ["CASHLESS — VERIFIED", "CASHLESS — DEMO DATA"]
+
+def test_hospitals_network_and_logic_combinations():
+    """Verify multiple filter parameters use strict AND logic."""
+    # City + Insurer
+    r1 = client.get("/api/hospitals/network?city=Mumbai&insurer=CareGuard Insurance").json()
+    for rec in r1["results"]:
+        assert rec["city"] == "Mumbai"
+        assert rec["insurer_name"] == "CareGuard Insurance"
+
+    # City + Specialty
+    r2 = client.get("/api/hospitals/network?city=Delhi&specialty=Orthopedics").json()
+    for rec in r2["results"]:
+        assert rec["city"] == "Delhi"
+        assert "Orthopedics" in rec["specialties"]
+
+    # Insurer + Specialty
+    r3 = client.get("/api/hospitals/network?insurer=Optima Health&specialty=Cardiology").json()
+    for rec in r3["results"]:
+        assert rec["insurer_name"] == "Optima Health"
+        assert "Cardiology" in rec["specialties"]
+
+    # Procedure + Cashless
+    r4 = client.get("/api/hospitals/network?procedure=Appendectomy&cashless=true").json()
+    for rec in r4["results"]:
+        assert rec["procedure_name"] == "Appendectomy"
+        assert rec["cashless_status"] in ["CASHLESS — VERIFIED", "CASHLESS — DEMO DATA"]
+
+    # City + Insurer + Specialty + Cashless (Bangalore + CareGuard + Cardiology + true)
+    r5 = client.get("/api/hospitals/network?city=Bangalore&insurer=CareGuard Insurance&specialty=Cardiology&cashless=true").json()
+    assert len(r5["results"]) > 0
+    for rec in r5["results"]:
+        assert rec["city"] == "Bangalore"
+        assert rec["insurer_name"] == "CareGuard Insurance"
+        assert "Cardiology" in rec["specialties"]
+        assert rec["cashless_status"] in ["CASHLESS — VERIFIED", "CASHLESS — DEMO DATA"]
+
+def test_hospitals_network_no_result():
+    """Verify query combination with no matches returns empty results."""
+    # Bangalore + CareGuard + Ophthalmology (Nayana has Ophthalmology but is Bharat Medical, SCMC is CareGuard but has no Ophthalmology)
+    response = client.get("/api/hospitals/network?city=Bangalore&insurer=CareGuard Insurance&specialty=Ophthalmology&cashless=true")
+    assert response.status_code == 200
+    assert len(response.json()["results"]) == 0
+
+def test_hospitals_network_unavailable_data():
+    """Verify that unmapped insurer queries return explicit NOT AVAILABLE states honestly."""
+    response = client.get("/api/hospitals/network?insurer=Unknown Global Health")
+    assert response.status_code == 200
+    data = response.json()
+    assert len(data["results"]) > 0
+    for rec in data["results"]:
+        assert rec["network_status"] == "NOT_AVAILABLE"
+        assert rec["cashless_status"] == "NOT AVAILABLE"
+        assert rec["data_status"] == "NOT_AVAILABLE"
+
+def test_hospitals_network_demo_data_labels():
+    """Verify that demo relationship rows are correctly labeled as DEMO_DATA."""
+    # Bharat Medical relations are demo only (or NOT_AVAILABLE for unmapped ones)
+    response = client.get("/api/hospitals/network?insurer=Bharat Medical")
+    assert response.status_code == 200
+    data = response.json()
+    for rec in data["results"]:
+        assert rec["data_status"] in ["DEMO_DATA", "NOT_AVAILABLE"]
+
+def test_hospitals_network_deterministic_repeated():
+    """Verify network results are deterministic and repeated calls return identical values."""
+    url = "/api/hospitals/network?city=Mumbai&insurer=CareGuard Insurance"
+    r1 = client.get(url).json()
+    r2 = client.get(url).json()
+    assert r1 == r2

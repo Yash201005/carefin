@@ -2,7 +2,10 @@ import logging
 
 from fastapi import APIRouter, HTTPException, Query, status
 
-from app.schemas.hospitals import HospitalCostComparisonResponse
+from app.schemas.hospitals import (
+    HospitalCostComparisonResponse,
+    HospitalNetworkResponse,
+)
 from app.services.hospital_data import HospitalDataService
 
 router = APIRouter()
@@ -59,4 +62,47 @@ def get_hospital_costs(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="An error occurred while matching hospital cost details."
+        )
+
+@router.get("/network", response_model=HospitalNetworkResponse, status_code=status.HTTP_200_OK)
+def get_hospital_network(
+    city: str | None = Query(None, description="Filter by city (e.g. Mumbai, Delhi, Bangalore)"),
+    insurer: str | None = Query(None, description="Filter by insurer (e.g. CareGuard Insurance, Optima Health, Bharat Medical)"),
+    procedure: str | None = Query(None, description="Filter by procedure (e.g. Angioplasty, Cataract Surgery)"),
+    specialty: str | None = Query(None, description="Filter by specialty (e.g. Cardiology, Oncology)"),
+    cashless: str | None = Query(None, description="Filter by cashless availability (true, false, yes, no)")
+):
+    """
+    Retrieves and filters hospital network status and cashless eligibility using AND filtering rules.
+    """
+    try:
+        results = HospitalDataService.get_network(
+            city=city,
+            insurer=insurer,
+            procedure=procedure,
+            specialty=specialty,
+            cashless=cashless
+        )
+
+        disclaimer = (
+            "Disclaimer: Insurer network mappings and cashless options displayed are for reference. "
+            "Cashless/network status must be verified with the insurer, TPA, or hospital before admission."
+        )
+
+        return HospitalNetworkResponse(
+            query_params={
+                "city": city,
+                "insurer": insurer,
+                "procedure": procedure,
+                "specialty": specialty,
+                "cashless": cashless
+            },
+            results=results,
+            disclaimer=disclaimer
+        )
+    except Exception as e:  # noqa: BLE001
+        logger.error(f"Unexpected error retrieving hospital network details: {e!s}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="An error occurred while matching hospital network details."
         )

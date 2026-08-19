@@ -19,9 +19,10 @@ def test_app_shell_navigation_structure():
     assert '"My Insurance", href: "/insurance"' in content, "My Insurance must route to '/insurance'"
     assert '"Claims", href: "/claims"' in content, "Claims must route to '/claims'"
     assert '"Healthcare Costs", href: "/costs"' in content, "Costs must route to '/costs'"
+    assert '"Hospitals", href: "/hospitals"' in content, "Hospitals must route to '/hospitals'"
 
     # 2. Assert future modules are declared as not implemented
-    assert '"Hospitals", href: "#"' in content, "Hospitals must have isImplemented: false"
+    assert '"Insurance Advisor", href: "#"' in content, "Insurance Advisor must have isImplemented: false"
     
     # 3. Verify mobile burger toggle exists
     assert "setIsMobileMenuOpen" in content, "Mobile menu toggle must be present"
@@ -104,3 +105,26 @@ def test_costs_page_structure():
     assert "handleToggleSelectHospital" in content
     assert "handleLaunchOOPSimulation" in content
     assert "carefin_oop_sim_input" in content
+
+def test_hospitals_page_structure():
+    """Verify that the Hospital Network Finder page contains selectors and filter controls."""
+    file_path = get_frontend_file_path("src/app/hospitals/page.tsx")
+    assert os.path.exists(file_path), "Hospitals page.tsx must exist"
+
+    with open(file_path, "r", encoding="utf-8") as f:
+        content = f.read()
+
+    # 1. Assert presence of header and descriptors
+    assert "Hospital Network & Cashless Finder" in content
+    assert "Search active networks, cashless verifications" in content
+
+    # 2. Assert selectors and filters criteria exist
+    assert "CITY" in content
+    assert "INSURER" in content
+    assert "PROCEDURE" in content
+    assert "SPECIALTY" in content
+    assert "CASHLESS PRE-AUTH" in content
+
+    # 3. Assert integrations and handlers are mapped
+    assert "handleLaunchCostsQuery" in content
+    assert "carefin_costs_query_params" in content

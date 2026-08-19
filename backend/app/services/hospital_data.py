@@ -1,8 +1,12 @@
-from app.schemas.hospitals import HospitalProcedureCost, HospitalRecord
+from app.schemas.hospitals import (
+    HospitalNetworkRecord,
+    HospitalProcedureCost,
+    HospitalRecord,
+)
 
 
 class HospitalDataService:
-    # Centralized dataset representing various hospitals across cities and procedures
+    # Centralized dataset representing various hospitals across cities, procedures, and insurers
     HOSPITALS_DB = [  # noqa: RUF012
         {
             "id": "hosp_001",
@@ -51,6 +55,22 @@ class HospitalDataService:
                     "verification_date": "15-Jun-2026",
                     "source": "Demo Surgery Rates Guide"
                 }
+            },
+            "insurers": {
+                "careguard insurance": {
+                    "network_status": "IN_NETWORK",
+                    "cashless_status": "CASHLESS — VERIFIED",
+                    "source": "Insurers Network List PDF v1",
+                    "verification_date": "12-Jul-2026",
+                    "data_status": "VERIFIED_SOURCE"
+                },
+                "optima health": {
+                    "network_status": "IN_NETWORK",
+                    "cashless_status": "CASHLESS — DEMO DATA",
+                    "source": "Demo Insurer Booklet",
+                    "verification_date": "14-Jul-2026",
+                    "data_status": "DEMO_DATA"
+                }
             }
         },
         {
@@ -89,6 +109,22 @@ class HospitalDataService:
                     "data_status": "DEMO_DATA",
                     "verification_date": "20-Jun-2026",
                     "source": "Demo Package Rates Booklet"
+                }
+            },
+            "insurers": {
+                "bharat medical": {
+                    "network_status": "IN_NETWORK",
+                    "cashless_status": "CASHLESS — DEMO DATA",
+                    "source": "Demo Insurer Directory",
+                    "verification_date": "16-Jul-2026",
+                    "data_status": "DEMO_DATA"
+                },
+                "careguard insurance": {
+                    "network_status": "IN_NETWORK",
+                    "cashless_status": "CASHLESS — VERIFIED",
+                    "source": "Insurers Network List PDF v1",
+                    "verification_date": "12-Jul-2026",
+                    "data_status": "VERIFIED_SOURCE"
                 }
             }
         },
@@ -129,6 +165,15 @@ class HospitalDataService:
                     "verification_date": "24-Jun-2026",
                     "source": "Demo Surgery Booklet"
                 }
+            },
+            "insurers": {
+                "optima health": {
+                    "network_status": "IN_NETWORK",
+                    "cashless_status": "CASHLESS — VERIFIED",
+                    "source": "Insurers Network List PDF v1",
+                    "verification_date": "20-Jul-2026",
+                    "data_status": "VERIFIED_SOURCE"
+                }
             }
         },
         {
@@ -157,6 +202,15 @@ class HospitalDataService:
                     "data_status": "DEMO_DATA",
                     "verification_date": "25-Jun-2026",
                     "source": "Demo Package Rates"
+                }
+            },
+            "insurers": {
+                "bharat medical": {
+                    "network_status": "IN_NETWORK",
+                    "cashless_status": "CASHLESS — DEMO DATA",
+                    "source": "Demo Insurer Booklet",
+                    "verification_date": "22-Jul-2026",
+                    "data_status": "DEMO_DATA"
                 }
             }
         },
@@ -207,6 +261,22 @@ class HospitalDataService:
                     "verification_date": "30-Jun-2026",
                     "source": "Demo SCMC Package Tariffs"
                 }
+            },
+            "insurers": {
+                "careguard insurance": {
+                    "network_status": "IN_NETWORK",
+                    "cashless_status": "CASHLESS — VERIFIED",
+                    "source": "Insurers Network List PDF v1",
+                    "verification_date": "12-Jul-2026",
+                    "data_status": "VERIFIED_SOURCE"
+                },
+                "optima health": {
+                    "network_status": "IN_NETWORK",
+                    "cashless_status": "CASHLESS — DEMO DATA",
+                    "source": "Demo SCMC Insurer Tariffs",
+                    "verification_date": "25-Jul-2026",
+                    "data_status": "DEMO_DATA"
+                }
             }
         },
         {
@@ -225,6 +295,15 @@ class HospitalDataService:
                     "data_status": "DEMO_DATA",
                     "verification_date": "02-Jul-2026",
                     "source": "Demo Clinic Daycare Tariffs"
+                }
+            },
+            "insurers": {
+                "bharat medical": {
+                    "network_status": "IN_NETWORK",
+                    "cashless_status": "CASHLESS — DEMO DATA",
+                    "source": "Demo Clinic Booklet",
+                    "verification_date": "28-Jul-2026",
+                    "data_status": "DEMO_DATA"
                 }
             }
         }
@@ -349,3 +428,91 @@ class HospitalDataService:
                 filtered_results.sort(key=lambda r: r.name.lower())
 
         return filtered_results
+
+    @staticmethod
+    def get_network(
+        city: str | None = None,
+        insurer: str | None = None,
+        procedure: str | None = None,
+        specialty: str | None = None,
+        cashless: str | None = None
+    ) -> list[HospitalNetworkRecord]:
+        """
+        Retrieves, filters, and maps hospital network status and cashless parameters
+        using strict AND evaluation logic.
+        """
+        results = []
+        is_cashless_filter = cashless.strip().lower() if cashless else None
+
+        # Iterate over global database
+        for hosp in HospitalDataService.HOSPITALS_DB:
+            # 1. Filter by city (case-insensitive)
+            if city and hosp["city"].strip().lower() != city.strip().lower():
+                continue
+
+            # 2. Filter by specialty (case-insensitive)
+            if specialty:
+                hosp_specialties_lower = [s.strip().lower() for s in hosp["specialties"]]
+                if specialty.strip().lower() not in hosp_specialties_lower:
+                    continue
+
+            # 3. Filter by procedure (case-insensitive match)
+            if procedure:
+                proc_key = procedure.strip().lower()
+                if proc_key not in hosp["procedures"]:
+                    continue
+
+            # Collect active relationships for the requested insurer
+            target_insurers = {}
+            if insurer:
+                ins_key = insurer.strip().lower()
+                # Under AND logic, if insurer is specifically requested and hospital doesn't have it,
+                # we must check if we return it as NOT_AVAILABLE/UNKNOWN.
+                # However, if cashless=true is requested, a NOT_AVAILABLE relationship will fail that constraint.
+                if ins_key in hosp["insurers"]:
+                    target_insurers[insurer] = hosp["insurers"][ins_key]
+                else:
+                    # Explicit honest representation for non-network insurer queries:
+                    target_insurers[insurer] = {
+                        "network_status": "NOT_AVAILABLE",
+                        "cashless_status": "NOT AVAILABLE",
+                        "source": "Information not available",
+                        "verification_date": None,
+                        "data_status": "NOT_AVAILABLE"
+                    }
+            else:
+                # If no insurer filter is requested, include all relationships mapped for this hospital
+                for key, val in hosp["insurers"].items():
+                    # Format matching name nicely
+                    nice_name = "CareGuard Insurance" if key == "careguard insurance" else (
+                        "Optima Health" if key == "optima health" else "Bharat Medical"
+                    )
+                    target_insurers[nice_name] = val
+
+            # 4. Map relationships and check cashless constraints
+            for ins_name, rel in target_insurers.items():
+                c_status = rel["cashless_status"]
+
+                # Apply cashless filtering (AND constraint)
+                if is_cashless_filter:
+                    is_cashless_active = c_status in ["CASHLESS — VERIFIED", "CASHLESS — DEMO DATA"]
+                    if is_cashless_filter in ["true", "yes", "y", "1"] and not is_cashless_active or is_cashless_filter in ["false", "no", "n", "0"] and is_cashless_active:
+                        continue
+
+                # Compile structured record
+                record = HospitalNetworkRecord(
+                    hospital_name=hosp["name"],
+                    city=hosp["city"],
+                    location=hosp["location"],
+                    specialties=hosp["specialties"],
+                    procedure_name=procedure.capitalize() if procedure else None,
+                    insurer_name=ins_name,
+                    network_status=rel["network_status"],
+                    cashless_status=c_status,
+                    source=rel["source"],
+                    data_status=rel["data_status"],
+                    verification_date=rel["verification_date"]
+                )
+                results.append(record)
+
+        return results
