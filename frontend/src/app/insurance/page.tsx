@@ -198,6 +198,9 @@ export default function CareFinVerticalSlice() {
 
       const data: OOPCalculationResponse = await response.json();
       setCalculationResult(data);
+      if (typeof window !== "undefined") {
+        localStorage.setItem("carefin_last_oop_calculation", JSON.stringify(data));
+      }
     } catch (err: unknown) {
       const errMsg = err instanceof Error ? err.message : "Calculation failed.";
       setCalcError(errMsg);
