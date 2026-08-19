@@ -5,7 +5,7 @@ This checklist tracks the implementation status of CareFin features based on the
 ---
 
 ## Phase 0 — Engineering Foundation
-- [ ] **SPEC-001: Project Setup** — Git layout, folder structure, Node + Python configuration.
+- [~] SPEC-001: Project Setup — implementation complete; live PostgreSQL/pgvector verification blocked by missing Docker
 - [ ] **SPEC-002: Design System** — Global CSS variables integration.
 - [ ] **SPEC-003: Application Shell** — Navigation sidebar, layout structure, responsive container.
 - [ ] **SPEC-004: Database Foundation** — PostgreSQL setup, pgvector connection.

@@ -1,0 +1,94 @@
+name: CareFin CI Pipeline
+
+on:
+  push:
+    branches: [ develop, main ]
+  pull_request:
+    branches: [ develop, main ]
+
+jobs:
+  frontend:
+    name: Frontend Verification
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-size: '18'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install Dependencies
+        run: |
+          cd frontend
+          npm ci
+
+      - name: TypeScript Check
+        run: |
+          cd frontend
+          npm run type-check
+
+      - name: ESLint Check
+        run: |
+          cd frontend
+          npm run lint
+
+      - name: Next.js Production Build
+        run: |
+          cd frontend
+          npm run build
+
+  backend:
+    name: Backend Verification
+    runs-on: ubuntu-latest
+    services:
+      db:
+        image: pgvector/pgvector:pg15
+        ports:
+          - 5432:5432
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: carefin_secure_password_dev
+          POSTGRES_DB: carefin
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+          cache: 'pip'
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          cd backend
+          pip install -r requirements.txt
+
+      - name: Lint and Code Format Check
+        run: |
+          pip install ruff
+          ruff check .
+
+      - name: Run Backend Tests
+        env:
+          DATABASE_URL: postgresql://postgres:carefin_secure_password_dev@localhost:5432/carefin
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: carefin_secure_password_dev
+          POSTGRES_DB: carefin
+          POSTGRES_PORT: 5432
+          ENV: test
+          JWT_SECRET: test_secret_key_needs_to_be_32_characters_long
+        run: |
+          cd backend
+          pytest
