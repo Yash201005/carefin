@@ -1,0 +1,39 @@
+# Node.js
+node_modules/
+dist/
+dist-ssr/
+*.local
+.eslintcache
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+ENV/
+env/
+.env
+.env.*
+
+# OS
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# IDEs
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Project-specific
+logs/
+*.log
+data/*.csv
+data/*.json
+!data/demo/
