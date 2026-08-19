@@ -20,9 +20,10 @@ def test_app_shell_navigation_structure():
     assert '"Claims", href: "/claims"' in content, "Claims must route to '/claims'"
     assert '"Healthcare Costs", href: "/costs"' in content, "Costs must route to '/costs'"
     assert '"Hospitals", href: "/hospitals"' in content, "Hospitals must route to '/hospitals'"
+    assert '"Insurance Advisor", href: "/advisor"' in content, "Insurance Advisor must route to '/advisor'"
 
     # 2. Assert future modules are declared as not implemented
-    assert '"Insurance Advisor", href: "#"' in content, "Insurance Advisor must have isImplemented: false"
+    assert '"Medical Funding", href: "#"' in content, "Funding must have isImplemented: false"
     
     # 3. Verify mobile burger toggle exists
     assert "setIsMobileMenuOpen" in content, "Mobile menu toggle must be present"
@@ -128,3 +129,31 @@ def test_hospitals_page_structure():
     # 3. Assert integrations and handlers are mapped
     assert "handleLaunchCostsQuery" in content
     assert "carefin_costs_query_params" in content
+
+def test_advisor_page_structure():
+    """Verify that the Insurance Advisor page contains selectors and input forms."""
+    file_path = get_frontend_file_path("src/app/advisor/page.tsx")
+    assert os.path.exists(file_path), "Advisor page.tsx must exist"
+
+    with open(file_path, "r", encoding="utf-8") as f:
+        content = f.read()
+
+    # 1. Assert presence of header and descriptors
+    assert "Insurance Advisor" in content
+    assert "Compare plans suitable based on your demographics" in content
+
+    # 2. Assert requirement inputs exist
+    assert "PRIMARY INSURED AGE" in content
+    assert "CITY / REGION" in content
+    assert "FAMILY MEMBERS COUNT" in content
+    assert "COVERAGE TYPE" in content
+    assert "YEARLY BUDGET LIMIT" in content
+    assert "DESIRED SUM INSURED" in content
+    assert "CO-PAY PREFERENCE" in content
+    assert "ICU / ROOM RENT PREFERENCE" in content
+    assert "DEDUCTIBLE PREFERENCE" in content
+
+    # 3. Assert comparison and disclaimer details
+    assert "Medical Underwriting Notice" in content
+    assert "Advisor Suitability Disclaimer" in content
+    assert "handleToggleSelectPlan" in content
