@@ -22,10 +22,9 @@ def test_app_shell_navigation_structure():
     assert '"Hospitals", href: "/hospitals"' in content, "Hospitals must route to '/hospitals'"
     assert '"Insurance Advisor", href: "/advisor"' in content, "Insurance Advisor must route to '/advisor'"
     assert '"Government Schemes", href: "/schemes"' in content, "Government Schemes must route to '/schemes'"
+    assert '"Medical Funding", href: "/funding"' in content, "Medical Funding must route to '/funding'"
+    assert '"Documents", href: "/documents"' in content, "Documents must route to '/documents'"
 
-    # 2. Assert future modules are declared as not implemented
-    assert '"Medical Funding", href: "#"' in content, "Funding must have isImplemented: false"
-    
     # 3. Verify mobile burger toggle exists
     assert "setIsMobileMenuOpen" in content, "Mobile menu toggle must be present"
 
@@ -200,3 +199,59 @@ def test_schemes_page_structure():
     assert "verification_date" in content or "Verified on" in content
     assert "data_status" in content or "dataStatus" in content
     assert "Assistance Verification & Trust Notice" in content or "Disclaimer" in content
+
+
+def test_funding_page_structure():
+    """Verify that the Medical Funding page contains cost inputs, calculators, fee breakdowns, registries, and disclaimers."""
+    file_path = get_frontend_file_path("src/app/funding/page.tsx")
+    assert os.path.exists(file_path), "Funding page.tsx must exist"
+
+    with open(file_path, "r", encoding="utf-8") as f:
+        content = f.read()
+
+    # 1. Assert headers and layout tabs
+    assert "Medical Funding & Gap Planner" in content
+    assert "Treatment Gap Planner" in content
+    assert "Crowdfunding Target Calculator" in content
+    assert "Centralized Assistance Registry" in content
+
+    # 2. Assert treatment gap inputs
+    assert "totalCost" in content or "Total Cost" in content
+    assert "insuranceCovered" in content or "Insurance Share" in content
+    assert "patientContribution" in content or "Personal Contribution" in content
+    assert "otherAssistance" in content or "Other Confirmed Aid" in content
+    assert "fundingGap" in content or "Funding Gap" in content
+
+    # 3. Assert crowdfunding calculator parameters
+    assert "requiredNet" in content or "Required Net Amount" in content
+    assert "selectedPlatformName" in content or "platform" in content
+    assert "platFeePct" in content or "Platform Fee" in content
+    assert "fixedFee" in content or "Fixed Fee" in content
+
+    # 4. Assert fee breakdown and estimations display
+    assert "platform_fee" in content or "Platform fee" in content
+    assert "payment_processing_fee" in content or "gateway" in content
+    assert "applicable_taxes" in content or "taxes" in content
+    assert "required_gross_target" in content or "Fundraising Goal" in content
+
+    # 5. Assert source registry rendering
+    assert "sources" in content or "data_status" in content or "source" in content
+    assert "limitations" in content or "application_notes" in content
+
+    # 6. Assert disclaimers and trust labeling
+    assert "disclaimer" in content or "Disclaimer" in content
+    assert "ESTIMATE" in content
+
+
+def test_documents_page_structure():
+    """Verify that the Documents page contains user documents list, upload form inputs, and disclaimers."""
+    file_path = get_frontend_file_path("src/app/documents/page.tsx")
+    assert os.path.exists(file_path), "Documents page.tsx must exist"
+
+    with open(file_path, "r", encoding="utf-8") as f:
+        content = f.read()
+
+    assert "Document Vault" in content
+    assert "Upload New Document" in content or "upload" in content
+    assert "Filename" in content or "document_type" in content
+    assert "Saved Calculation History" in content or "calculations" in content

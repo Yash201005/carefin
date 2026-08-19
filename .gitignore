@@ -37,3 +37,7 @@ logs/
 data/*.csv
 data/*.json
 !data/demo/
+
+# Database & Uploads
+backend/test.db
+backend/uploads/
