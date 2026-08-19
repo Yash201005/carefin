@@ -135,6 +135,9 @@ export default function CareFinVerticalSlice() {
 
       const data: PolicyMetadata = await response.json();
       setPolicyMetadata(data);
+      if (typeof window !== "undefined") {
+        localStorage.setItem("carefin_policy_metadata", JSON.stringify(data));
+      }
     } catch (err: unknown) {
       const errMsg = err instanceof Error ? err.message : "An unexpected error occurred during analysis.";
       setUploadError(errMsg);

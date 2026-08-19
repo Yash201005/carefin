@@ -33,7 +33,7 @@ export default function AppShell({ children }: AppShellProps) {
   const navItems = [
     { name: "Dashboard", href: "/", icon: LayoutDashboard, isImplemented: true },
     { name: "My Insurance", href: "/insurance", icon: FileCheck, isImplemented: true },
-    { name: "Claims", href: "#", icon: ClipboardList, isImplemented: false },
+    { name: "Claims", href: "/claims", icon: ClipboardList, isImplemented: true },
     { name: "Healthcare Costs", href: "#", icon: IndianRupee, isImplemented: false },
     { name: "Hospitals", href: "#", icon: Hospital, isImplemented: false },
     { name: "Insurance Advisor", href: "#", icon: UserCheck, isImplemented: false },
