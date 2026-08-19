@@ -34,7 +34,7 @@ export default function AppShell({ children }: AppShellProps) {
     { name: "Dashboard", href: "/", icon: LayoutDashboard, isImplemented: true },
     { name: "My Insurance", href: "/insurance", icon: FileCheck, isImplemented: true },
     { name: "Claims", href: "/claims", icon: ClipboardList, isImplemented: true },
-    { name: "Healthcare Costs", href: "#", icon: IndianRupee, isImplemented: false },
+    { name: "Healthcare Costs", href: "/costs", icon: IndianRupee, isImplemented: true },
     { name: "Hospitals", href: "#", icon: Hospital, isImplemented: false },
     { name: "Insurance Advisor", href: "#", icon: UserCheck, isImplemented: false },
     { name: "Medical Funding", href: "#", icon: TrendingUp, isImplemented: false },

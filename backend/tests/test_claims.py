@@ -1,10 +1,9 @@
 import pytest
 from fastapi.testclient import TestClient
-from app.main import app
-from app.schemas.policy import PolicyMetadata, ExtractedParam
-from app.schemas.claims import ClaimsGuidanceRequest
-from app.services.claims_guidance import ClaimsGuidanceService
+
 from app.api.endpoints.policy import policy_text_cache
+from app.main import app
+from app.schemas.policy import ExtractedParam, PolicyMetadata
 
 client = TestClient(app)
 

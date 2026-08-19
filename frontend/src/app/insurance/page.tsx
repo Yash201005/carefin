@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   FileText,
   Upload,
@@ -95,6 +95,26 @@ export default function CareFinVerticalSlice() {
   const [isCalculating, setIsCalculating] = useState(false);
   const [calcError, setCalcError] = useState<string | null>(null);
   const [calculationResult, setCalculationResult] = useState<OOPCalculationResponse | null>(null);
+
+  // Read simulated cost inputs from localStorage
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const cachedSim = localStorage.getItem("carefin_oop_sim_input");
+      if (cachedSim) {
+        try {
+          const parsed = JSON.parse(cachedSim);
+          // Decouple state updates using a macro-task delay
+          setTimeout(() => {
+            if (parsed.treatment_cost) setTreatmentCost(String(parsed.treatment_cost));
+            if (parsed.procedure_category) setProcedureCategory(parsed.procedure_category);
+          }, 0);
+          localStorage.removeItem("carefin_oop_sim_input");
+        } catch {
+          // Ignore
+        }
+      }
+    }
+  }, []);
 
   // File Upload Handler
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {

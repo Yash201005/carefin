@@ -18,9 +18,10 @@ def test_app_shell_navigation_structure():
     assert '"Dashboard", href: "/"' in content, "Dashboard must route to '/'"
     assert '"My Insurance", href: "/insurance"' in content, "My Insurance must route to '/insurance'"
     assert '"Claims", href: "/claims"' in content, "Claims must route to '/claims'"
+    assert '"Healthcare Costs", href: "/costs"' in content, "Costs must route to '/costs'"
 
     # 2. Assert future modules are declared as not implemented
-    assert '"Healthcare Costs", href: "#"' in content, "Costs must have isImplemented: false"
+    assert '"Hospitals", href: "#"' in content, "Hospitals must have isImplemented: false"
     
     # 3. Verify mobile burger toggle exists
     assert "setIsMobileMenuOpen" in content, "Mobile menu toggle must be present"
@@ -79,3 +80,27 @@ def test_insurance_analyzer_migration():
     # 2. Assert the deterministic calculator functions are integrated
     assert "formatCurrency" in content
     assert "handleCalculate" in content
+
+def test_costs_page_structure():
+    """Verify that the Healthcare Costs page contains selectors, sliders, and comparators."""
+    file_path = get_frontend_file_path("src/app/costs/page.tsx")
+    assert os.path.exists(file_path), "Costs page.tsx must exist"
+
+    with open(file_path, "r", encoding="utf-8") as f:
+        content = f.read()
+
+    # 1. Assert presence of header and descriptors
+    assert "Healthcare Costs Comparison" in content
+    assert "Compare package rates across local hospital networks" in content
+
+    # 2. Assert selectors and search options exist
+    assert "PROCEDURE" in content
+    assert "CITY" in content
+    assert "MIN COST" in content
+    assert "MAX COST" in content
+    assert "SORT RESULTS BY" in content
+
+    # 3. Assert interactive components are integrated
+    assert "handleToggleSelectHospital" in content
+    assert "handleLaunchOOPSimulation" in content
+    assert "carefin_oop_sim_input" in content
