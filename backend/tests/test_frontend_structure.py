@@ -21,9 +21,10 @@ def test_app_shell_navigation_structure():
     assert '"Healthcare Costs", href: "/costs"' in content, "Costs must route to '/costs'"
     assert '"Hospitals", href: "/hospitals"' in content, "Hospitals must route to '/hospitals'"
     assert '"Insurance Advisor", href: "/advisor"' in content, "Insurance Advisor must route to '/advisor'"
+    assert '"Medical Funding", href: "/funding"' in content, "Medical Funding must route to '/funding'"
 
     # 2. Assert future modules are declared as not implemented
-    assert '"Medical Funding", href: "#"' in content, "Funding must have isImplemented: false"
+    assert '"Government Assistance", href: "#"' in content, "Government Assistance must have isImplemented: false"
     
     # 3. Verify mobile burger toggle exists
     assert "setIsMobileMenuOpen" in content, "Mobile menu toggle must be present"
@@ -157,3 +158,44 @@ def test_advisor_page_structure():
     assert "Medical Underwriting Notice" in content
     assert "Advisor Suitability Disclaimer" in content
     assert "handleToggleSelectPlan" in content
+
+def test_funding_page_structure():
+    """Verify that the Medical Funding page contains cost inputs, calculators, fee breakdowns, registries, and disclaimers."""
+    file_path = get_frontend_file_path("src/app/funding/page.tsx")
+    assert os.path.exists(file_path), "Funding page.tsx must exist"
+
+    with open(file_path, "r", encoding="utf-8") as f:
+        content = f.read()
+
+    # 1. Assert headers and layout tabs
+    assert "Medical Funding & Gap Planner" in content
+    assert "Treatment Gap Planner" in content
+    assert "Crowdfunding Target Calculator" in content
+    assert "Centralized Assistance Registry" in content
+
+    # 2. Assert treatment gap inputs
+    assert "totalCost" in content or "Total Cost" in content
+    assert "insuranceCovered" in content or "Insurance Share" in content
+    assert "patientContribution" in content or "Personal Contribution" in content
+    assert "otherAssistance" in content or "Other Confirmed Aid" in content
+    assert "fundingGap" in content or "Funding Gap" in content
+
+    # 3. Assert crowdfunding calculator parameters
+    assert "requiredNet" in content or "Required Net Amount" in content
+    assert "selectedPlatformName" in content or "platform" in content
+    assert "platFeePct" in content or "Platform Fee" in content
+    assert "fixedFee" in content or "Fixed Fee" in content
+
+    # 4. Assert fee breakdown and estimations display
+    assert "platform_fee" in content or "Platform fee" in content
+    assert "payment_processing_fee" in content or "gateway" in content
+    assert "applicable_taxes" in content or "taxes" in content
+    assert "required_gross_target" in content or "Fundraising Goal" in content
+
+    # 5. Assert source registry rendering
+    assert "sources" in content or "data_status" in content or "source" in content
+    assert "limitations" in content or "application_notes" in content
+
+    # 6. Assert disclaimers and trust labeling
+    assert "disclaimer" in content or "Disclaimer" in content
+    assert "ESTIMATE" in content
