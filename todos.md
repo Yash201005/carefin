@@ -7,7 +7,7 @@ This checklist tracks the implementation status of CareFin features based on the
 ## Phase 0 — Engineering Foundation
 - [~] SPEC-001: Project Setup — implementation complete; live PostgreSQL/pgvector verification blocked by missing Docker
 - [~] SPEC-002: Insurance Policy Analyzer & OOP Calculator — implementation complete; live database verification blocked by missing Docker
-- [ ] **SPEC-003: Application Shell** — Navigation sidebar, layout structure, responsive container.
+- [x] **SPEC-003: Application Shell** — Navigation sidebar, layout structure, responsive container.
 - [ ] **SPEC-004: Database Foundation** — PostgreSQL setup, pgvector connection.
 - [ ] **SPEC-005: API Foundation** — FastAPI routing, middleware, global error handlers.
 - [ ] **SPEC-006: Authentication** — JWT validation, sign-in/sign-up API and views.
